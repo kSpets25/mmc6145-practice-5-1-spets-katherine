@@ -1,5 +1,4 @@
 // /pages/about.js
-// pages/about.js
 import NavBar from '../components/NavBar';
 
 export default function About() {

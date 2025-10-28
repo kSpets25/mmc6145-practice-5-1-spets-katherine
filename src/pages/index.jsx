@@ -18,24 +18,57 @@ export default function Home({ results, userquery, error }) {
 
       {results?.length > 0 ? (
         <ul className="results-list">
-          {results.map((item, idx) => (
-            <li key={idx} className="result-item">
-              <h3>{item.Name}</h3>
-              {item.wTeaser && <p className="teaser">{item.wTeaser}</p>}
-              <div className="links">
-                {item.wUrl && (
-                  <a href={item.wUrl} target="_blank" rel="noreferrer">
-                    🔗 Wikipedia
-                  </a>
-                )}
-                {item.yUrl && (
-                  <a href={item.yUrl} target="_blank" rel="noreferrer">
-                    ▶️ YouTube
-                  </a>
-                )}
-              </div>
-            </li>
-          ))}
+        {results.map((item, idx) => {
+  const artistName = item.name || "Unknown Artist"; // lowercase n
+
+  return (
+    <li key={idx} className="result-item">
+      <div className="artist-card">
+        <a
+          href={item.wUrl || '#'}
+          target="_blank"
+          rel="noreferrer"
+          className="artist-image-link"
+        >
+          <img
+            src={item.wImg || '/default-artist.png'}
+            alt={artistName}
+            className="artist-image"
+          />
+        </a>
+
+        <div className="artist-info">
+          <h3 className="artist-name">
+            {item.wUrl ? (
+              <a href={item.wUrl} target="_blank" rel="noreferrer">
+                {artistName}
+              </a>
+            ) : (
+              artistName
+            )}
+          </h3>
+
+          {item.wTeaser && <p className="teaser">{item.wTeaser}</p>}
+
+          <div className="links">
+            {item.wUrl && (
+              <a href={item.wUrl} target="_blank" rel="noreferrer">
+                🔗 Wikipedia
+              </a>
+            )}
+            {item.yUrl && (
+              <a href={item.yUrl} target="_blank" rel="noreferrer">
+                ▶️ YouTube
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+})}
+
+
         </ul>
       ) : (
         userquery && !error && <p className="no-results">No similar music found.</p>
@@ -45,16 +78,7 @@ export default function Home({ results, userquery, error }) {
 }
 
 export async function getServerSideProps(context) {
-  
   const { userquery } = context.query;
-  ////notes from teacher
-  //const searchTerm = context.query.userquery
-  //if (searchTerm) {
-  // const response = await fetch(/* url + API key + searchTerm*)
-  // const data = awayit res.json()
-  //return {props: {data}}
-  //}
-  //return {props: {}} (we hae to return this object even without performing the above call.)
 
   if (!userquery) {
     return { props: { results: [], userquery: null } };
@@ -66,24 +90,58 @@ export async function getServerSideProps(context) {
   )}&type=music&info=1&limit=10&k=${apiKey}`;
 
   try {
+    // 1️⃣ Fetch from TasteDive
     const res = await fetch(apiUrl);
     const data = await res.json();
 
+    let results = data?.similar?.results || [];
+
+    // 2️⃣ Fetch Wikipedia image for each result (if available)
+    results = await Promise.all(
+      results.map(async (item) => {
+        if (item.wUrl) {
+          try {
+            // Extract the Wikipedia page title from the URL
+            const pageTitle = decodeURIComponent(item.wUrl.split('/').pop());
+
+            // Wikipedia REST API to get summary + thumbnail
+            const wikiRes = await fetch(
+              `https://en.wikipedia.org/api/rest_v1/page/summary/${pageTitle}`
+            );
+            const wikiData = await wikiRes.json();
+            console.log("🔍 API Results:", JSON.stringify(results, null, 2));
+
+            if (wikiData.thumbnail?.source) {
+              item.wImg = wikiData.thumbnail.source; // ✅ add image URL
+            } else {
+              item.wImg = null; // no image available
+            }
+          } catch (err) {
+            console.error('❌ Failed to fetch Wikipedia image for:', item.Name);
+            item.wImg = null;
+          }
+        }
+        return item;
+      })
+    );
+
     return {
       props: {
-        results: data?.Similar?.Results || [],
+        results,
         userquery,
       },
     };
   } catch (err) {
+    console.error('❌ Error fetching from TasteDive:', err);
     return {
       props: {
         results: [],
         userquery,
-        error: 'Failed to fetch similar music from TasteDive API.',
+        error: 'Failed to fetch similar music from TasteDive or Wikipedia.',
       },
     };
   }
 }
+
 
 

@@ -154,4 +154,50 @@ body {
   text-align: center;
 }
 
+/* Artist result card styles */
+.artist-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f9f9f9;
+  transition: box-shadow 0.2s ease;
+}
+
+.artist-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.artist-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.artist-info {
+  flex: 1;
+}
+
+.artist-name {
+  margin: 0 0 0.3rem;
+}
+
+.artist-name a {
+  text-decoration: none;
+  color: #0070f3;
+}
+
+.artist-name a:hover {
+  text-decoration: underline;
+}
+
+.teaser {
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
 
