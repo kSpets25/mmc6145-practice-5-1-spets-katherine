@@ -20,7 +20,8 @@ export default function Home({ results, userquery, error }) {
         <ul className="results-list">
         {results.map((item, idx) => {
   const artistName = item.name || "Unknown Artist"; // lowercase n
-
+    // Use the artist image if it exists, otherwise fallback to music note image
+  const artistImage = item.wImg || '/music-note.png'; // add image to /public/music-note.png  
   return (
     <li key={idx} className="result-item">
       <div className="artist-card">
