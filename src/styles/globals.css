@@ -201,3 +201,26 @@ body {
   font-size: 0.95rem;
 }
 
+.artist-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.artist-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.fallback-image {
+  width: 50px;          
+  height: 50px;
+  object-fit: contain;    /* keep aspect ratio */
+  filter: grayscale(50%); /* optional: give it a "placeholder" look */
+  display: block;
+  margin: 0 auto;        
+}
+
+

@@ -78,6 +78,7 @@ export default function Home({ results, userquery, error }) {
   );
 }
 
+
 export async function getServerSideProps(context) {
   const { userquery } = context.query;
 
